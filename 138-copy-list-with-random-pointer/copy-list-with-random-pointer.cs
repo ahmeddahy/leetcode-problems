@@ -1,40 +1,63 @@
-public class Solution
-{
-    public Node CopyRandomList(Node head)
-    {
-        var startNode = head;
-        while(startNode != null)
-        {
-            var tmp = startNode.next;
-            var newNode = new Node(startNode.val);
-            startNode.next = newNode;
-            newNode.next = tmp;
+/*
+// Definition for a Node.
+public class Node {
+    public int val;
+    public Node next;
+    public Node random;
 
-            startNode = startNode.next.next;
+    public Node(int _val) {
+        val = _val;
+        next = null;
+        random = null;
+    }
+}
+*/
+
+public class Solution {
+    public Node CopyRandomList(Node head) {
+        if (head == null) {
+            return null;
         }
 
-        startNode = head;
-        while(startNode != null)
-        {
-            if(startNode.random != null)
-            {
-                startNode.next.random = startNode.random.next;
-            }
-            startNode = startNode.next.next;
+        // Creating a new weaved list of original and copied nodes.
+        Node ptr = head;
+        while (ptr != null) {
+            // Cloned node
+            Node newNode = new Node(ptr.val);
+
+            // Inserting the cloned node just next to the original node.
+            // If A->B->C is the original linked list,
+            // Linked list after weaving cloned nodes would be
+            // A->A'->B->B'->C->C'
+            newNode.next = ptr.next;
+            ptr.next = newNode;
+            ptr = newNode.next;
         }
 
-        var result = head?.next;
-        var copy = head?.next;
-        var original = head;
-        while (original != null)
-        {
-            var tmp = copy.next?.next;
-            original.next = original.next.next;
-            copy.next = tmp;
-            original = original.next;
-            copy = copy.next;
+        ptr = head;
+
+        // Now link the random pointers of the new nodes created.
+        // Iterate the newly created list and use the original nodes' random
+        // pointers, to assign references to random pointers for cloned nodes.
+        while (ptr != null) {
+            ptr.next.random = (ptr.random != null) ? ptr.random.next : null;
+            ptr = ptr.next.next;
         }
 
-        return result;
+        // Unweave the linked list to get back the original linked list and the
+        // cloned list. i.e. A->A'->B->B'->C->C' would be broken to A->B->C and
+        // A'->B'->C'
+        Node ptr_old_list = head;       // A->B->C
+        Node ptr_new_list = head.next;  // A'->B'->C'
+        Node head_old = head.next;
+        while (ptr_old_list != null) {
+            ptr_old_list.next = ptr_old_list.next.next;
+            ptr_new_list.next =
+                (ptr_new_list.next != null) ? ptr_new_list.next.next : null;
+            ptr_old_list = ptr_old_list.next;
+            ptr_new_list = ptr_new_list.next;
+        }
+
+        return head_old;
     }
 }
